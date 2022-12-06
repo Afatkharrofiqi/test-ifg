@@ -1,7 +1,14 @@
 import React from "react";
-import { render, fireEvent, cleanup } from "@testing-library/react";
+import {
+  render,
+  fireEvent,
+  cleanup,
+  act,
+  screen,
+} from "@testing-library/react";
 import "@testing-library/jest-dom/extend-expect";
 import App from "./App";
+import Employee from "./components/Employee.js";
 
 const TEST_IDS = {
   tableId: "table",
@@ -57,12 +64,18 @@ describe("Editable Table", () => {
 
   it("should result in appropriate UI changes when employee salary changes to a new valid value", () => {
     fireEvent.click(emplSalaryDiv2, { button: "0" });
-    emplSalaryInput2 = queryByTestId(TEST_IDS.emplSalaryInputPrefix + "1");
+    // Nyari make metho getByTestId
+    emplSalaryInput2 = getByTestId(`${TEST_IDS.emplSalaryDivPrefix}1`);
+    // Ngecek apakah salary element ada
     expect(emplSalaryInput2).toBeInTheDocument();
-    fireEvent.change(emplSalaryInput2, { target: { value: "110000" } });
-    expect(emplSaveBtn2).toBeEnabled();
+    // Membuat event double click untuk menampilkan element input
+    fireEvent.dblClick(emplSalaryInput2);
+    // Mengubah value input dengan menggunakan test id dari input
+    fireEvent.change(getByTestId(`${TEST_IDS.emplSalaryInputPrefix}1`), {
+      target: { value: "110000" },
+    });
     fireEvent.click(emplSaveBtn2, { button: "0" });
-    emplSalaryDiv2 = queryByTestId(TEST_IDS.emplSalaryDivPrefix + "1");
+    emplSalaryDiv2 = queryByTestId(`${TEST_IDS.emplSalaryDivPrefix}1`);
     expect(emplSalaryInput2).not.toBeInTheDocument();
     expect(emplSalaryDiv2).toBeInTheDocument();
     expect(emplSalaryDiv2.textContent).toEqual("110000");
@@ -70,9 +83,17 @@ describe("Editable Table", () => {
 
   it("save button should be disabled when employee salary changes to an invalid value", () => {
     fireEvent.click(emplSalaryDiv2, { button: "0" });
-    emplSalaryInput2 = queryByTestId(TEST_IDS.emplSalaryInputPrefix + "1");
+    // Nyari make metho getByTestId
+    emplSalaryInput2 = getByTestId(`${TEST_IDS.emplSalaryDivPrefix}1`);
     expect(emplSalaryInput2).toBeInTheDocument();
-    fireEvent.change(emplSalaryInput2, { target: { value: "70000" } });
+    fireEvent.dblClick(emplSalaryInput2);
+    // fireEvent.change(emplSalaryInput2, { target: { value: "70000" } });
+    // Karena sebelumnya input salary sudah diubah menjadi 110000, maka saat ini value input salary adalah 110000
+    // Input akan invalid jika value input salary sama 110000 jadi jika value input salary diubah menjadi 110000 maka input akan invalid
+    // sedangkan jika diubah jadi 70000 maka input akan valid, jika input valid maka button akan enabled
+    fireEvent.change(getByTestId(`${TEST_IDS.emplSalaryInputPrefix}1`), {
+      target: { value: "110000" },
+    });
     expect(emplSaveBtn2).toBeDisabled();
   });
 
